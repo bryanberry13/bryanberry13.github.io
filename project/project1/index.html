@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Bryan Berry" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="../../img/favicon.ico">
+    <title>Project1</title>
+    <meta name="generator" content="Hugo 0.79.0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="../../"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="../../post/">BLOG</a></li>
+        
+        <li><a href="../../projects/">PROJECTS</a></li>
+        
+        <li><a href="../../resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="../../project/project1/">Project1</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         January 1, 0001 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<div id="selecting-and-analyzing-intial-data-sets" class="section level1">
+<h1>Selecting and Analyzing intial data sets</h1>
+<p>The two datasets analyzed in this project were the drinks data set found on fivethirtyeight and the global mortality dataset from the google spreadsheet given in the project instructions (<a href="https://docs.google.com/spreadsheets/d/1wZhPLMCHKJvwOkP4juclhjFgqIY8fQFMemwKL2c64vk/edit" class="uri">https://docs.google.com/spreadsheets/d/1wZhPLMCHKJvwOkP4juclhjFgqIY8fQFMemwKL2c64vk/edit</a>). The drinks dataset shows the data collected from a 2010 study of 193 different countries, showing the amount of beer, wine, spirits, and total alcohol consumed for each country. The mortality data set shows percentages of different types of mortality rates (such as those from cardiovascular disease or cancer) from the years 1990-2016 grouped by 223 different countries. I thought these would be interesting datasets to study in conjunction to see if various types of alcohol consumption can correlate to certain types of mortality rates. I also think the mortality rate dataset on its own is very interesting, as different types of mortality rates might correlate with each other. I expect those with more alcohol consumed to have higher rates of alcohol disorder realted deaths, and possibly more car accident deaths due to drunk driving. I also expect a negative correlation between cancer mortality rate and malnutrition rates, as cancer is more likely to be diagnosed in wealthier countries that struggle less with malnutrition.</p>
+<pre class="r"><code>install.packages(&quot;fivethirtyeightdata&quot;, repos = &quot;https://fivethirtyeightdata.github.io/drat/&quot;, 
+    type = &quot;source&quot;)
+library(fivethirtyeight)
+library(fivethirtyeightdata)
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+library(readxl)
+
+mortality &lt;- read_excel(&quot;global_mortality.xlsx&quot;)
+drinks &lt;- drinks
+glimpse(mortality)</code></pre>
+<pre><code>## Rows: 6,156
+## Columns: 35
+## $ country                                    &lt;chr&gt; &quot;Afghanistan&quot;, &quot;Afghanista…
+## $ country_code                               &lt;chr&gt; &quot;AFG&quot;, &quot;AFG&quot;, &quot;AFG&quot;, &quot;AFG&quot;…
+## $ year                                       &lt;dbl&gt; 1990, 1991, 1992, 1993, 19…
+## $ `Cardiovascular diseases (%)`              &lt;dbl&gt; 17.61040, 17.80181, 18.386…
+## $ `Cancers (%)`                              &lt;dbl&gt; 4.025975, 4.054145, 4.1739…
+## $ `Respiratory diseases (%)`                 &lt;dbl&gt; 2.106626, 2.134176, 2.2082…
+## $ `Diabetes (%)`                             &lt;dbl&gt; 3.832555, 3.822228, 3.9001…
+## $ `Dementia (%)`                             &lt;dbl&gt; 0.5314287, 0.5324973, 0.54…
+## $ `Lower respiratory infections (%)`         &lt;dbl&gt; 10.886362, 10.356968, 10.0…
+## $ `Neonatal deaths (%)`                      &lt;dbl&gt; 9.184653, 8.938897, 8.8413…
+## $ `Diarrheal diseases (%)`                   &lt;dbl&gt; 2.497141, 2.572228, 2.7077…
+## $ `Road accidents (%)`                       &lt;dbl&gt; 3.715944, 3.729142, 3.8163…
+## $ `Liver disease (%)`                        &lt;dbl&gt; 0.8369093, 0.8455159, 0.87…
+## $ `Tuberculosis (%)`                         &lt;dbl&gt; 5.877075, 5.891704, 6.0346…
+## $ `Kidney disease (%)`                       &lt;dbl&gt; 1.680611, 1.671115, 1.7009…
+## $ `Digestive diseases (%)`                   &lt;dbl&gt; 1.058771, 1.049322, 1.0628…
+## $ `HIV/AIDS (%)`                             &lt;dbl&gt; 0.01301948, 0.01451458, 0.…
+## $ `Suicide (%)`                              &lt;dbl&gt; 0.4366105, 0.4422802, 0.45…
+## $ `Malaria (%)`                              &lt;dbl&gt; 0.4488863, 0.4550191, 0.46…
+## $ `Homicide (%)`                             &lt;dbl&gt; 1.287020, 1.290991, 1.3261…
+## $ `Nutritional deficiencies (%)`             &lt;dbl&gt; 0.3505045, 0.3432123, 0.34…
+## $ `Meningitis (%)`                           &lt;dbl&gt; 3.037603, 2.903202, 2.8406…
+## $ `Protein-energy malnutrition (%)`          &lt;dbl&gt; 0.3297599, 0.3221711, 0.32…
+## $ `Drowning (%)`                             &lt;dbl&gt; 0.9838624, 0.9545860, 0.95…
+## $ `Maternal deaths (%)`                      &lt;dbl&gt; 1.769213, 1.749264, 1.7642…
+## $ `Parkinson disease (%)`                    &lt;dbl&gt; 0.02515859, 0.02545063, 0.…
+## $ `Alcohol disorders (%)`                    &lt;dbl&gt; 0.02899828, 0.02917152, 0.…
+## $ `Intestinal infectious diseases (%)`       &lt;dbl&gt; 0.1833303, 0.1781074, 0.17…
+## $ `Drug disorders (%)`                       &lt;dbl&gt; 0.04120540, 0.04203340, 0.…
+## $ `Hepatitis (%)`                            &lt;dbl&gt; 0.1387378, 0.1350081, 0.13…
+## $ `Fire (%)`                                 &lt;dbl&gt; 0.1741567, 0.1706712, 0.17…
+## $ `Heat-related (hot and cold exposure) (%)` &lt;dbl&gt; 0.1378229, 0.1348266, 0.13…
+## $ `Natural disasters (%)`                    &lt;dbl&gt; 0.00000000, 0.79760256, 0.…
+## $ `Conflict (%)`                             &lt;dbl&gt; 0.932, 2.044, 2.408, NA, 4…
+## $ `Terrorism (%)`                            &lt;dbl&gt; 0.007, 0.040, 0.027, NA, 0…</code></pre>
+<pre class="r"><code>glimpse(drinks)</code></pre>
+<pre><code>## Rows: 193
+## Columns: 5
+## $ country                      &lt;chr&gt; &quot;Afghanistan&quot;, &quot;Albania&quot;, &quot;Algeria&quot;, &quot;An…
+## $ beer_servings                &lt;int&gt; 0, 89, 25, 245, 217, 102, 193, 21, 261, …
+## $ spirit_servings              &lt;int&gt; 0, 132, 0, 138, 57, 128, 25, 179, 72, 75…
+## $ wine_servings                &lt;int&gt; 0, 54, 14, 312, 45, 45, 221, 11, 212, 19…
+## $ total_litres_of_pure_alcohol &lt;dbl&gt; 0.0, 4.9, 0.7, 12.4, 5.9, 4.9, 8.3, 3.8,…</code></pre>
+<div id="selecting-only-2010" class="section level2">
+<h2>Selecting only 2010</h2>
+<p>Because the drinks dataset was made using data from 2010, the mortality dataset needed to be filtered to 2010 observations only to minimize bias. Therefore, all conclusions from the data throughout this project is only accurate for the year 2010.</p>
+<pre class="r"><code>mortalitytid &lt;- mortality %&gt;% filter(year == 2010)</code></pre>
+</div>
+<div id="untidying-and-tidying-drinks" class="section level2">
+<h2>Untidying and Tidying Drinks</h2>
+<p>Here, the mortality dataset was pivoted longer for every variable that contained a %, which would make each numeric variable shift to a column named name and the value for that numeric variable to value. This is easily undone to retidy data by pivoting the names back to individual columns and values back to their original positions.</p>
+<pre class="r"><code>untid &lt;- mortalitytid %&gt;% pivot_longer(contains(&quot;%&quot;))
+head(untid)</code></pre>
+<pre><code>## # A tibble: 6 x 5
+##   country     country_code  year name                              value
+##   &lt;chr&gt;       &lt;chr&gt;        &lt;dbl&gt; &lt;chr&gt;                             &lt;dbl&gt;
+## 1 Afghanistan AFG           2010 Cardiovascular diseases (%)      25.6  
+## 2 Afghanistan AFG           2010 Cancers (%)                       5.98 
+## 3 Afghanistan AFG           2010 Respiratory diseases (%)          3.14 
+## 4 Afghanistan AFG           2010 Diabetes (%)                      5.93 
+## 5 Afghanistan AFG           2010 Dementia (%)                      0.848
+## 6 Afghanistan AFG           2010 Lower respiratory infections (%)  6.45</code></pre>
+<pre class="r"><code>untid %&gt;% pivot_wider(names_from = &quot;name&quot;, values_from = &quot;value&quot;) %&gt;% 
+    head()</code></pre>
+<pre><code>## # A tibble: 6 x 35
+##   country country_code  year `Cardiovascular… `Cancers (%)` `Respiratory di…
+##   &lt;chr&gt;   &lt;chr&gt;        &lt;dbl&gt;            &lt;dbl&gt;         &lt;dbl&gt;            &lt;dbl&gt;
+## 1 Afghan… AFG           2010             25.6          5.98             3.14
+## 2 Albania ALB           2010             58.4         19.1              3.33
+## 3 Algeria DZA           2010             37.1         10.2              3.25
+## 4 Americ… ASM           2010             28.5         16.2              5.05
+## 5 Andean… &lt;NA&gt;          2010             20.2         17.4              4.52
+## 6 Andorra AND           2010             32.5         28.0              5.58
+## # … with 29 more variables: `Diabetes (%)` &lt;dbl&gt;, `Dementia (%)` &lt;dbl&gt;, `Lower
+## #   respiratory infections (%)` &lt;dbl&gt;, `Neonatal deaths (%)` &lt;dbl&gt;, `Diarrheal
+## #   diseases (%)` &lt;dbl&gt;, `Road accidents (%)` &lt;dbl&gt;, `Liver disease (%)` &lt;dbl&gt;,
+## #   `Tuberculosis (%)` &lt;dbl&gt;, `Kidney disease (%)` &lt;dbl&gt;, `Digestive diseases
+## #   (%)` &lt;dbl&gt;, `HIV/AIDS (%)` &lt;dbl&gt;, `Suicide (%)` &lt;dbl&gt;, `Malaria (%)` &lt;dbl&gt;,
+## #   `Homicide (%)` &lt;dbl&gt;, `Nutritional deficiencies (%)` &lt;dbl&gt;, `Meningitis
+## #   (%)` &lt;dbl&gt;, `Protein-energy malnutrition (%)` &lt;dbl&gt;, `Drowning (%)` &lt;dbl&gt;,
+## #   `Maternal deaths (%)` &lt;dbl&gt;, `Parkinson disease (%)` &lt;dbl&gt;, `Alcohol
+## #   disorders (%)` &lt;dbl&gt;, `Intestinal infectious diseases (%)` &lt;dbl&gt;, `Drug
+## #   disorders (%)` &lt;dbl&gt;, `Hepatitis (%)` &lt;dbl&gt;, `Fire (%)` &lt;dbl&gt;,
+## #   `Heat-related (hot and cold exposure) (%)` &lt;dbl&gt;, `Natural disasters
+## #   (%)` &lt;dbl&gt;, `Conflict (%)` &lt;dbl&gt;, `Terrorism (%)` &lt;dbl&gt;</code></pre>
+</div>
+<div id="inner-join" class="section level2">
+<h2>Inner join</h2>
+<p>I chose an inner join for the data, which will exclude any country not appearing in both datasets (inside of venn diagram). This choice was determined as countries not appearing in both would result in a lot of NA's and not allow for the analysis of mortality rates based upon drinks data. I used the tidy mortality data with only 2010 observations and the base drinks data in the join.</p>
+<pre class="r"><code>fulldata &lt;- mortalitytid %&gt;% inner_join(drinks)
+head(fulldata)</code></pre>
+<pre><code>## # A tibble: 6 x 39
+##   country country_code  year `Cardiovascular… `Cancers (%)` `Respiratory di…
+##   &lt;chr&gt;   &lt;chr&gt;        &lt;dbl&gt;            &lt;dbl&gt;         &lt;dbl&gt;            &lt;dbl&gt;
+## 1 Afghan… AFG           2010             25.6          5.98             3.14
+## 2 Albania ALB           2010             58.4         19.1              3.33
+## 3 Algeria DZA           2010             37.1         10.2              3.25
+## 4 Andorra AND           2010             32.5         28.0              5.58
+## 5 Angola  AGO           2010             10.7          5.01             1.67
+## 6 Argent… ARG           2010             34.1         21.5              6.20
+## # … with 33 more variables: `Diabetes (%)` &lt;dbl&gt;, `Dementia (%)` &lt;dbl&gt;, `Lower
+## #   respiratory infections (%)` &lt;dbl&gt;, `Neonatal deaths (%)` &lt;dbl&gt;, `Diarrheal
+## #   diseases (%)` &lt;dbl&gt;, `Road accidents (%)` &lt;dbl&gt;, `Liver disease (%)` &lt;dbl&gt;,
+## #   `Tuberculosis (%)` &lt;dbl&gt;, `Kidney disease (%)` &lt;dbl&gt;, `Digestive diseases
+## #   (%)` &lt;dbl&gt;, `HIV/AIDS (%)` &lt;dbl&gt;, `Suicide (%)` &lt;dbl&gt;, `Malaria (%)` &lt;dbl&gt;,
+## #   `Homicide (%)` &lt;dbl&gt;, `Nutritional deficiencies (%)` &lt;dbl&gt;, `Meningitis
+## #   (%)` &lt;dbl&gt;, `Protein-energy malnutrition (%)` &lt;dbl&gt;, `Drowning (%)` &lt;dbl&gt;,
+## #   `Maternal deaths (%)` &lt;dbl&gt;, `Parkinson disease (%)` &lt;dbl&gt;, `Alcohol
+## #   disorders (%)` &lt;dbl&gt;, `Intestinal infectious diseases (%)` &lt;dbl&gt;, `Drug
+## #   disorders (%)` &lt;dbl&gt;, `Hepatitis (%)` &lt;dbl&gt;, `Fire (%)` &lt;dbl&gt;,
+## #   `Heat-related (hot and cold exposure) (%)` &lt;dbl&gt;, `Natural disasters
+## #   (%)` &lt;dbl&gt;, `Conflict (%)` &lt;dbl&gt;, `Terrorism (%)` &lt;dbl&gt;,
+## #   beer_servings &lt;int&gt;, spirit_servings &lt;int&gt;, wine_servings &lt;int&gt;,
+## #   total_litres_of_pure_alcohol &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<div id="summary-statistics" class="section level1">
+<h1>Summary Statistics</h1>
+<p>Summary statistics were first calculated by averaging the results from all countries. Cardiovasular disease had the highest mortality rate by a significant margin. Also, there was large standard deviations in the average mortality rates, showing that they vary a lot between countries. The min and max statistics highlight this too, as the min and max for each variable are typically very distant from each other. Lastly, there were some countries with a minimum of 0 liters alcohol consumed, which makes sense as in some countries alcohol is illegal. The standard deviation for drinks was even larger, often as large as the actual value for the specific amount of alcohol consumed. Then, to ensure year wasn't counted as numeric, it was shifted into a character. Then, countries with alcohol disorders greater than 1% of deaths was filtered, which provided some interesting results. This showed three countries, El Salvador, Mongolia, and Guatemala, having the highest percentage of alcohol disorders, but far from the most alcohol consumed. For example Finland consumes close to five times the alcohol of El Salvador, but only 60% the alcohol disorders that El Salvador does based of percentage mortality. Next, a new categorical variable showing called nutrition was created, where high designates countries with nutritional deficiency mortality above the mean, and low designates countries with nutritional deficency mortality below the mean. A similar variable was created, except the next one was related to cardiovascular disease mortality rates. The nutritional deficiency categorical variable showed many interesting relationships, but the most significant was that those with low nutrition deficiency had a majority of deaths from cardiovasular disease or cancer, while mortality rate was much more spread out in those with high nutritional deficiency.</p>
+<pre class="r"><code># Summary statistics averaged across all countries
+fulldata %&gt;% group_by(year) %&gt;% na.omit() %&gt;% summarize_if(is.numeric, 
+    list(ddmean = mean, ddsd = sd, ddvar = var, ddmin = min, 
+        ddmax = max, ddndistinct = n_distinct)) %&gt;% pivot_longer(-1) %&gt;% 
+    separate(name, into = c(&quot;var&quot;, &quot;stat&quot;), sep = &quot;dd&quot;) %&gt;% pivot_wider(names_from = &quot;var&quot;, 
+    values_from = &quot;value&quot;) %&gt;% head()</code></pre>
+<pre><code>## # A tibble: 6 x 38
+##    year stat  `Cardiovascular… `Cancers (%)_` `Respiratory di… `Diabetes (%)_`
+##   &lt;dbl&gt; &lt;chr&gt;            &lt;dbl&gt;          &lt;dbl&gt;            &lt;dbl&gt;           &lt;dbl&gt;
+## 1  2010 mean             29.8           15.1             3.93             6.65
+## 2  2010 sd               14.2            8.56            2.29             4.51
+## 3  2010 var             202.            73.2             5.24            20.3 
+## 4  2010 min               5.30           3.03            0.784            1.09
+## 5  2010 max              64.8           33.3            13.4             29.9 
+## 6  2010 ndis…           165            165             165              165   
+## # … with 32 more variables: `Dementia (%)_` &lt;dbl&gt;, `Lower respiratory
+## #   infections (%)_` &lt;dbl&gt;, `Neonatal deaths (%)_` &lt;dbl&gt;, `Diarrheal diseases
+## #   (%)_` &lt;dbl&gt;, `Road accidents (%)_` &lt;dbl&gt;, `Liver disease (%)_` &lt;dbl&gt;,
+## #   `Tuberculosis (%)_` &lt;dbl&gt;, `Kidney disease (%)_` &lt;dbl&gt;, `Digestive diseases
+## #   (%)_` &lt;dbl&gt;, `HIV/AIDS (%)_` &lt;dbl&gt;, `Suicide (%)_` &lt;dbl&gt;, `Malaria
+## #   (%)_` &lt;dbl&gt;, `Homicide (%)_` &lt;dbl&gt;, `Nutritional deficiencies (%)_` &lt;dbl&gt;,
+## #   `Meningitis (%)_` &lt;dbl&gt;, `Protein-energy malnutrition (%)_` &lt;dbl&gt;,
+## #   `Drowning (%)_` &lt;dbl&gt;, `Maternal deaths (%)_` &lt;dbl&gt;, `Parkinson disease
+## #   (%)_` &lt;dbl&gt;, `Alcohol disorders (%)_` &lt;dbl&gt;, `Intestinal infectious
+## #   diseases (%)_` &lt;dbl&gt;, `Drug disorders (%)_` &lt;dbl&gt;, `Hepatitis (%)_` &lt;dbl&gt;,
+## #   `Fire (%)_` &lt;dbl&gt;, `Heat-related (hot and cold exposure) (%)_` &lt;dbl&gt;,
+## #   `Natural disasters (%)_` &lt;dbl&gt;, `Conflict (%)_` &lt;dbl&gt;, `Terrorism
+## #   (%)_` &lt;dbl&gt;, beer_servings_ &lt;dbl&gt;, spirit_servings_ &lt;dbl&gt;,
+## #   wine_servings_ &lt;dbl&gt;, total_litres_of_pure_alcohol_ &lt;dbl&gt;</code></pre>
+<pre class="r"><code># year as a character
+fulldata &lt;- fulldata %&gt;% mutate(year = as.character(year))
+
+
+# Filters to high alcohol disorder mortality rate
+fulldata %&gt;% filter(`Alcohol disorders (%)` &gt; 1) %&gt;% select(country, 
+    `Alcohol disorders (%)`, total_litres_of_pure_alcohol, beer_servings, 
+    wine_servings, spirit_servings) %&gt;% arrange(desc(`Alcohol disorders (%)`)) %&gt;% 
+    head()</code></pre>
+<pre><code>## # A tibble: 6 x 6
+##   country `Alcohol disord… total_litres_of… beer_servings wine_servings
+##   &lt;chr&gt;              &lt;dbl&gt;            &lt;dbl&gt;         &lt;int&gt;         &lt;int&gt;
+## 1 El Sal…             2.39              2.2            52             2
+## 2 Mongol…             2.22              4.9            77             8
+## 3 Guatem…             1.75              2.2            53             2
+## 4 Estonia             1.67              9.5           224            59
+## 5 Denmark             1.47             10.4           224           278
+## 6 Finland             1.34             10             263            97
+## # … with 1 more variable: spirit_servings &lt;int&gt;</code></pre>
+<pre class="r"><code># Groupby high nutritional deficieny
+fulldatamut &lt;- fulldata %&gt;% mutate(Nutrition = ifelse(`Nutritional deficiencies (%)` &gt; 
+    mean(`Nutritional deficiencies (%)`), &quot;High Nutritional Deficiency&quot;, 
+    &quot;Low Nutritional Deficiency&quot;))
+
+# Groupby high Cardiovascular disease
+Graph3 &lt;- fulldatamut %&gt;% mutate(Cardio = ifelse(`Cardiovascular diseases (%)` &gt; 
+    mean(`Cardiovascular diseases (%)`), &quot;High Cardiovascular Disease&quot;, 
+    &quot;Low Cardiovascular Disease&quot;))
+
+
+# summary stats grouped by nutritional deficiency ranking
+fulldatamut %&gt;% select(-year) %&gt;% group_by(Nutrition) %&gt;% summarize_if(is.numeric, 
+    list(ddmean = mean, ddsd = sd, ddmin = min, ddmax = max)) %&gt;% 
+    head()</code></pre>
+<pre><code>## # A tibble: 2 x 145
+##   Nutrition `Cardiovascular… `Cancers (%)_dd… `Respiratory di… `Diabetes (%)_d…
+##   &lt;chr&gt;                &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+## 1 High Nut…             14.1             7.25             2.42             4.80
+## 2 Low Nutr…             35.5            17.8              4.48             7.74
+## # … with 140 more variables: `Dementia (%)_ddmean` &lt;dbl&gt;, `Lower respiratory
+## #   infections (%)_ddmean` &lt;dbl&gt;, `Neonatal deaths (%)_ddmean` &lt;dbl&gt;,
+## #   `Diarrheal diseases (%)_ddmean` &lt;dbl&gt;, `Road accidents (%)_ddmean` &lt;dbl&gt;,
+## #   `Liver disease (%)_ddmean` &lt;dbl&gt;, `Tuberculosis (%)_ddmean` &lt;dbl&gt;, `Kidney
+## #   disease (%)_ddmean` &lt;dbl&gt;, `Digestive diseases (%)_ddmean` &lt;dbl&gt;, `HIV/AIDS
+## #   (%)_ddmean` &lt;dbl&gt;, `Suicide (%)_ddmean` &lt;dbl&gt;, `Malaria (%)_ddmean` &lt;dbl&gt;,
+## #   `Homicide (%)_ddmean` &lt;dbl&gt;, `Nutritional deficiencies (%)_ddmean` &lt;dbl&gt;,
+## #   `Meningitis (%)_ddmean` &lt;dbl&gt;, `Protein-energy malnutrition
+## #   (%)_ddmean` &lt;dbl&gt;, `Drowning (%)_ddmean` &lt;dbl&gt;, `Maternal deaths
+## #   (%)_ddmean` &lt;dbl&gt;, `Parkinson disease (%)_ddmean` &lt;dbl&gt;, `Alcohol disorders
+## #   (%)_ddmean` &lt;dbl&gt;, `Intestinal infectious diseases (%)_ddmean` &lt;dbl&gt;, `Drug
+## #   disorders (%)_ddmean` &lt;dbl&gt;, `Hepatitis (%)_ddmean` &lt;dbl&gt;, `Fire
+## #   (%)_ddmean` &lt;dbl&gt;, `Heat-related (hot and cold exposure) (%)_ddmean` &lt;dbl&gt;,
+## #   `Natural disasters (%)_ddmean` &lt;dbl&gt;, `Conflict (%)_ddmean` &lt;dbl&gt;,
+## #   `Terrorism (%)_ddmean` &lt;dbl&gt;, beer_servings_ddmean &lt;dbl&gt;,
+## #   spirit_servings_ddmean &lt;dbl&gt;, wine_servings_ddmean &lt;dbl&gt;,
+## #   total_litres_of_pure_alcohol_ddmean &lt;dbl&gt;, `Cardiovascular diseases
+## #   (%)_ddsd` &lt;dbl&gt;, `Cancers (%)_ddsd` &lt;dbl&gt;, `Respiratory diseases
+## #   (%)_ddsd` &lt;dbl&gt;, `Diabetes (%)_ddsd` &lt;dbl&gt;, `Dementia (%)_ddsd` &lt;dbl&gt;,
+## #   `Lower respiratory infections (%)_ddsd` &lt;dbl&gt;, `Neonatal deaths
+## #   (%)_ddsd` &lt;dbl&gt;, `Diarrheal diseases (%)_ddsd` &lt;dbl&gt;, `Road accidents
+## #   (%)_ddsd` &lt;dbl&gt;, `Liver disease (%)_ddsd` &lt;dbl&gt;, `Tuberculosis
+## #   (%)_ddsd` &lt;dbl&gt;, `Kidney disease (%)_ddsd` &lt;dbl&gt;, `Digestive diseases
+## #   (%)_ddsd` &lt;dbl&gt;, `HIV/AIDS (%)_ddsd` &lt;dbl&gt;, `Suicide (%)_ddsd` &lt;dbl&gt;,
+## #   `Malaria (%)_ddsd` &lt;dbl&gt;, `Homicide (%)_ddsd` &lt;dbl&gt;, `Nutritional
+## #   deficiencies (%)_ddsd` &lt;dbl&gt;, `Meningitis (%)_ddsd` &lt;dbl&gt;, `Protein-energy
+## #   malnutrition (%)_ddsd` &lt;dbl&gt;, `Drowning (%)_ddsd` &lt;dbl&gt;, `Maternal deaths
+## #   (%)_ddsd` &lt;dbl&gt;, `Parkinson disease (%)_ddsd` &lt;dbl&gt;, `Alcohol disorders
+## #   (%)_ddsd` &lt;dbl&gt;, `Intestinal infectious diseases (%)_ddsd` &lt;dbl&gt;, `Drug
+## #   disorders (%)_ddsd` &lt;dbl&gt;, `Hepatitis (%)_ddsd` &lt;dbl&gt;, `Fire
+## #   (%)_ddsd` &lt;dbl&gt;, `Heat-related (hot and cold exposure) (%)_ddsd` &lt;dbl&gt;,
+## #   `Natural disasters (%)_ddsd` &lt;dbl&gt;, `Conflict (%)_ddsd` &lt;dbl&gt;, `Terrorism
+## #   (%)_ddsd` &lt;dbl&gt;, beer_servings_ddsd &lt;dbl&gt;, spirit_servings_ddsd &lt;dbl&gt;,
+## #   wine_servings_ddsd &lt;dbl&gt;, total_litres_of_pure_alcohol_ddsd &lt;dbl&gt;,
+## #   `Cardiovascular diseases (%)_ddmin` &lt;dbl&gt;, `Cancers (%)_ddmin` &lt;dbl&gt;,
+## #   `Respiratory diseases (%)_ddmin` &lt;dbl&gt;, `Diabetes (%)_ddmin` &lt;dbl&gt;,
+## #   `Dementia (%)_ddmin` &lt;dbl&gt;, `Lower respiratory infections (%)_ddmin` &lt;dbl&gt;,
+## #   `Neonatal deaths (%)_ddmin` &lt;dbl&gt;, `Diarrheal diseases (%)_ddmin` &lt;dbl&gt;,
+## #   `Road accidents (%)_ddmin` &lt;dbl&gt;, `Liver disease (%)_ddmin` &lt;dbl&gt;,
+## #   `Tuberculosis (%)_ddmin` &lt;dbl&gt;, `Kidney disease (%)_ddmin` &lt;dbl&gt;,
+## #   `Digestive diseases (%)_ddmin` &lt;dbl&gt;, `HIV/AIDS (%)_ddmin` &lt;dbl&gt;, `Suicide
+## #   (%)_ddmin` &lt;dbl&gt;, `Malaria (%)_ddmin` &lt;dbl&gt;, `Homicide (%)_ddmin` &lt;dbl&gt;,
+## #   `Nutritional deficiencies (%)_ddmin` &lt;dbl&gt;, `Meningitis (%)_ddmin` &lt;dbl&gt;,
+## #   `Protein-energy malnutrition (%)_ddmin` &lt;dbl&gt;, `Drowning (%)_ddmin` &lt;dbl&gt;,
+## #   `Maternal deaths (%)_ddmin` &lt;dbl&gt;, `Parkinson disease (%)_ddmin` &lt;dbl&gt;,
+## #   `Alcohol disorders (%)_ddmin` &lt;dbl&gt;, `Intestinal infectious diseases
+## #   (%)_ddmin` &lt;dbl&gt;, `Drug disorders (%)_ddmin` &lt;dbl&gt;, `Hepatitis
+## #   (%)_ddmin` &lt;dbl&gt;, `Fire (%)_ddmin` &lt;dbl&gt;, `Heat-related (hot and cold
+## #   exposure) (%)_ddmin` &lt;dbl&gt;, `Natural disasters (%)_ddmin` &lt;dbl&gt;, `Conflict
+## #   (%)_ddmin` &lt;dbl&gt;, `Terrorism (%)_ddmin` &lt;dbl&gt;, …</code></pre>
+</div>
+<div id="correlation-heatmap-for-all-numeric-variables" class="section level1">
+<h1>Correlation heatmap for all numeric variables</h1>
+<p>Here, a correlations matrix is set up in the first part of the code. Then, the highest and lowest correlations not equalling one were arranged to quickly see which variables correlate significantly. Finally, a correlation heatmap was created, with blue being a negative correlation and red being a positive correlation, and white being no correlation. When analyzing the correlations, nutritional deficiency and protein-energy malnutrition mortality rates had a correlation close to 1, which makes logical sense. Also, cancer and parkinsons had a high correlation, which could be due to countries able to diagnose one of those diseases might also have the capability to diagnose the other. Cancer and neonatal deaths are highly negatively correlated, which could be because neonatal deaths can be prevented in advanced medicalized countries, and those countries also have citizens who live longer, resulting in them dying from cancer as opposed to another preventable disease. The graph shows the various variables' correlations. Some of these are trivial correlations, such as beer servings correlated with average alcohol intake. Others, such as dementia and maternal deaths having strong negative correlations, prove interesting subjects to consider. There are far too many correlations to comment on within the scope of this project, but the heatmap is an effective visualizaiton to ensure meaningful correlations are not completely ignored.</p>
+<pre class="r"><code># set up correlation
+fulldatacor &lt;- fulldata %&gt;% na.omit %&gt;% select_if(is.numeric) %&gt;% 
+    cor() %&gt;% as.data.frame %&gt;% rownames_to_column(&quot;var1&quot;) %&gt;% 
+    pivot_longer(-1, names_to = &quot;var2&quot;, values_to = &quot;correlation&quot;)
+fulldatacor %&gt;% head()</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##   var1                        var2                             correlation
+##   &lt;chr&gt;                       &lt;chr&gt;                                  &lt;dbl&gt;
+## 1 Cardiovascular diseases (%) Cardiovascular diseases (%)           1     
+## 2 Cardiovascular diseases (%) Cancers (%)                           0.496 
+## 3 Cardiovascular diseases (%) Respiratory diseases (%)              0.216 
+## 4 Cardiovascular diseases (%) Diabetes (%)                          0.0527
+## 5 Cardiovascular diseases (%) Dementia (%)                          0.347 
+## 6 Cardiovascular diseases (%) Lower respiratory infections (%)     -0.686</code></pre>
+<pre class="r"><code># checking the highest and lowest non identical correlatinos
+fulldatacor %&gt;% filter(correlation != 1) %&gt;% arrange(desc(correlation)) %&gt;% 
+    head()</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##   var1                            var2                            correlation
+##   &lt;chr&gt;                           &lt;chr&gt;                                 &lt;dbl&gt;
+## 1 Nutritional deficiencies (%)    Protein-energy malnutrition (%)       0.999
+## 2 Protein-energy malnutrition (%) Nutritional deficiencies (%)          0.999
+## 3 Cancers (%)                     Parkinson disease (%)                 0.907
+## 4 Parkinson disease (%)           Cancers (%)                           0.907
+## 5 Meningitis (%)                  Maternal deaths (%)                   0.876
+## 6 Maternal deaths (%)             Meningitis (%)                        0.876</code></pre>
+<pre class="r"><code>fulldatacor %&gt;% filter(correlation != -1) %&gt;% arrange(correlation) %&gt;% 
+    head()</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##   var1                  var2                  correlation
+##   &lt;chr&gt;                 &lt;chr&gt;                       &lt;dbl&gt;
+## 1 Cancers (%)           Neonatal deaths (%)        -0.786
+## 2 Neonatal deaths (%)   Cancers (%)                -0.786
+## 3 Neonatal deaths (%)   Parkinson disease (%)      -0.738
+## 4 Parkinson disease (%) Neonatal deaths (%)        -0.738
+## 5 Cancers (%)           Maternal deaths (%)        -0.694
+## 6 Maternal deaths (%)   Cancers (%)                -0.694</code></pre>
+<pre class="r"><code>fulldatacor %&gt;% ggplot(aes(var1, var2, fill = correlation)) + 
+    geom_tile() + scale_fill_gradient2(low = &quot;blue&quot;, mid = &quot;white&quot;, 
+    high = &quot;red&quot;) + theme(axis.text.x = element_text(angle = 90, 
+    hjust = 1)) + xlab(&quot;Variable 1&quot;) + ylab(&quot;Variable 2&quot;) + ggtitle(&quot;Correlations Plot&quot;) + 
+    theme(plot.title = element_text(hjust = 0.5)) + theme(legend.position = &quot;right&quot;)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<div id="total-alcohol-alcohol-disorders-and-road-accidents" class="section level2">
+<h2>Total alcohol, alcohol disorders, and road accidents</h2>
+<p>While it might seem straightforward that alcohol consumption and alcohol disorder mortality percentages would be positively correlated, the plot shows a different picture. While there is a positive correlation, there are plenty of outliers from the line of best fit. This leads to the conclusion that while countries that consume more alcohol generally have more alcohol disorder mortality, it is certainly not a causation. Many countries have high consumption and low mortality or low consumption and high mortality from alcohol disorders. A guess as to why that could happen is that some wealthy countries might consume a lot of alcohol, but have better medical care than other countries to sustain such behavior, and countries with high alcohol disorder mortality rates might have poor healthcare systems. Also, while I expected road accidents might increase given more alcohol consumed due to drunk driving, that was not the case. In fact, it appears that the only cluster with high road accidents have low rates of alcohol consumption, however overall there is very little indication of a significant relationship between the two variables.</p>
+<pre class="r"><code>fulldata %&gt;% ggplot(aes(x = total_litres_of_pure_alcohol, y = `Alcohol disorders (%)`, 
+    color = `Road accidents (%)`)) + geom_point() + geom_smooth(method = &quot;lm&quot;, 
+    color = &quot;red&quot;) + xlab(&quot;Total Liters Alcohol Consumed&quot;) + 
+    ylab(&quot;Mortality Rate from Alcohol Disorders (%)&quot;) + labs(title = &quot;Alcohol Consumed Correlates to Higher Alcohol Disorder Mortality Rate&quot;) + 
+    scale_x_continuous(breaks = seq(0, 15, 2.5)) + geom_jitter() + 
+    theme_bw()</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cardiovascular-disease-cancer-and-malnutrition" class="section level2">
+<h2>Cardiovascular Disease, Cancer, and Malnutrition</h2>
+<p>In this plot, the cancer mortality rate is plotted against two separate variable. One is Nutrition, which can either have higher than mean or lower than mean nutrititional defieciency mortality rate. The other variable is Cardio which can either have higher or lower than the mean cardiovascular disease mortality rate. Combined this provides the four separate cases shown in the graph. The main observation drawn from this table is that low nutritional deficiency countries have much higher average cancer mortality rates. One might hypothesize that countries with better healthcare or more wealth would have less nutritional deficiencies combined with longer life expectancy and therefore more likely to diagnose cancer. The relationship between cardiovascular disease and cancer mortality appears to be a positive correlation. This could be explained similarly to the relationship between nutritional deficiency and cancer, where countries with longer life expectancy would be expected to have both higher cancer and higher cardiovascular mortality rates.</p>
+<pre class="r"><code>Graph3 %&gt;% ggplot(aes(x = Cardio, y = `Cancers (%)`, fill = Nutrition)) + 
+    geom_bar(stat = &quot;summary&quot;, fun = mean, position = &quot;dodge&quot;) + 
+    labs(title = &quot;Cancer Mortality Rates for Based on Cardiovascular and Nutritional Mortality&quot;, 
+        x = &quot;Cardiovacular Disease Mortality&quot;, y = &quot;Cancer Mortality Rate&quot;) + 
+    theme_light() + scale_y_continuous(breaks = seq(0, 20, 4)) + 
+    scale_fill_brewer()</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="kmeansclustering" class="section level2">
+<h2>kmeans/clustering</h2>
+<p>Initially, I selected variables used thus far for the two graphs to provide an easier visual (as opposed to showing all 30+ variables). Then, the silhouette graph was used to find the number of clusters for the data, which was determined to be 3, because it was the highest point on the graph. Finally, a PAM cluster analysis was run and a visualization was formed of all the variable. The main observation drawn from this is that the red cluster does not appear to be very different from green and blue, it just lies in between them but could be split into either one. Conversely, the blue and green clusters are quite distinct. The blue cluster is low in alcohol consumption, cardiovascular and cancer mortality rates. The green has high cardiovasular disease and low nutritional deficiency. Overall, the green and blue clusters match what has been discussed throughout the project, and the red cluster are those which don't fall into either category. The green cluster characterizes countries that are hypthesized to be wealthy with high life expectancies, and the blue cluster would be hypothesized to be the countries that are poorer with low life expectancy (again this is just a hypothesis and way to describe the cluster, no data on life expectancies or economic status was analyzed).</p>
+<pre class="r"><code># only select variables used thus far
+fulldataclust &lt;- Graph3 %&gt;% select(`Road accidents (%)`, `Cancers (%)`, 
+    total_litres_of_pure_alcohol, `Alcohol disorders (%)`, Nutrition, 
+    Cardio)
+
+library(cluster)
+gower1 &lt;- fulldataclust %&gt;% mutate_if(is.character, as.factor) %&gt;% 
+    daisy(metric = &quot;gower&quot;)
+
+dat2 &lt;- fulldataclust %&gt;% mutate_if(is.character, as.factor)
+
+# silhouette
+sil_width &lt;- vector()
+for (i in 2:10) {
+    pam_fit &lt;- pam(gower1, diss = TRUE, k = i)
+    sil_width[i] &lt;- pam_fit$silinfo$avg.width
+}
+ggplot() + geom_line(aes(x = 1:10, y = sil_width)) + scale_x_continuous(name = &quot;k&quot;, 
+    breaks = 1:10)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-9-1.png" width="1440" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>pam1 &lt;- pam(gower1, k = 3, diss = T)
+pam1</code></pre>
+<pre><code>## Medoids:
+##       ID    
+## [1,]  27  27
+## [2,] 108 108
+## [3,]  61  61
+## Clustering vector:
+##   [1] 1 2 2 2 3 2 2 2 2 2 2 1 3 1 2 2 1 3 1 3 1 1 1 2 3 3 1 3 2 3 3 1 2 1 3 3 1
+##  [38] 3 2 2 2 2 1 3 2 2 3 2 1 3 3 2 3 2 2 1 3 3 2 2 3 2 2 3 3 3 2 1 1 2 2 1 3 2
+##  [75] 2 2 1 2 2 1 2 2 3 3 2 2 1 2 2 1 3 2 2 2 2 3 3 2 2 3
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 73 entries ]
+## Objective function:
+##      build       swap 
+## 0.10317680 0.09573595 
+## 
+## Available components:
+## [1] &quot;medoids&quot;    &quot;id.med&quot;     &quot;clustering&quot; &quot;objective&quot;  &quot;isolation&quot; 
+## [6] &quot;clusinfo&quot;   &quot;silinfo&quot;    &quot;diss&quot;       &quot;call&quot;</code></pre>
+<pre class="r"><code># Plotting
+library(GGally)
+ggpairs(dat2, columns = 1:6, aes(color = as.factor(pam1$clustering)))</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-9-2.png" width="1440" style="display: block; margin: auto;" /></p>
+<p>In conclusion, this project really opened my eyes to data analysis and its usefulness. It was really interesting to create novel graphs, correlations, and really explore data in this format with creative freedom. Looking back on this project, if there was one thing I wish I could add it would be some sort of economic ranking for each country, and maybe geographic groups based off continent. Both of these would open up the data to multitudes of new analysis possibilities, and give my hypotheses about economic causation throughout this project more merit.</p>
+</div>
+</div>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="../../js/docs.min.js"></script>
+<script src="../../js/main.js"></script>
+
+<script src="../../js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

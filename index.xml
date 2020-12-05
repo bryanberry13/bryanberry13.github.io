@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Bryan Berry</title>
+    <link>/</link>
+    <description>Recent content on Bryan Berry</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Fri, 04 Dec 2020 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>First Post</title>
+      <link>/post/2020/12/04/first-post/</link>
+      <pubDate>Fri, 04 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2020/12/04/first-post/</guid>
+      <description>wefjkln;ewif
+print(&amp;quot;hello world&amp;quot;) ## [1] &amp;quot;hello world&amp;quot; print(&amp;quot;hello world&amp;quot;) Link to project 1
+Link to google</description>
+    </item>
+    
+    <item>
+      <title>Project 2</title>
+      <link>/project/project2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project2/</guid>
+      <description>0 Introduction My dataset comes from a tuitiontracker.org, and provides various information related to colleges, with a focus on tuition data. It has data on average pay in mid and early career for each college, as well as in and out-of-state tuitions. Also, there is a lot of identifier information for each college such as what type of education it provides and whether it is public or private. Lastly, it has a very interesting variable known as makes world better percent, which is the percentage of alumin who believe they make the world a better place.</description>
+    </item>
+    
+    <item>
+      <title>Project1</title>
+      <link>/project/project1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project1/</guid>
+      <description>Selecting and Analyzing intial data sets The two datasets analyzed in this project were the drinks data set found on fivethirtyeight and the global mortality dataset from the google spreadsheet given in the project instructions (https://docs.google.com/spreadsheets/d/1wZhPLMCHKJvwOkP4juclhjFgqIY8fQFMemwKL2c64vk/edit). The drinks dataset shows the data collected from a 2010 study of 193 different countries, showing the amount of beer, wine, spirits, and total alcohol consumed for each country. The mortality data set shows percentages of different types of mortality rates (such as those from cardiovascular disease or cancer) from the years 1990-2016 grouped by 223 different countries.</description>
+    </item>
+    
+    <item>
+      <title>Resume</title>
+      <link>/resume/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/resume/</guid>
+      <description>    </description>
+    </item>
+    
+  </channel>
+</rss>

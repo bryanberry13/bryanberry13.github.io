@@ -1,0 +1,205 @@
+---
+title: "Project1"
+author: "Bryan Berry"
+date: "9/20/2020"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F,
+tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
+```
+
+#Selecting and Analyzing intial data sets
+The two datasets analyzed in this project were the drinks data set found on fivethirtyeight and the global mortality dataset from the google spreadsheet given in the project instructions (https://docs.google.com/spreadsheets/d/1wZhPLMCHKJvwOkP4juclhjFgqIY8fQFMemwKL2c64vk/edit). The drinks dataset shows the data collected from a 2010 study of 193 different countries, showing the amount of beer, wine, spirits, and total alcohol consumed for each country. The mortality data set shows percentages of different types of mortality rates (such as those from cardiovascular disease or cancer) from the years 1990-2016 grouped by 223 different countries. I thought these would be interesting datasets to study in conjunction to see if various types of alcohol consumption can correlate to certain types of mortality rates. I also think the mortality rate dataset on its own is very interesting, as different types of mortality rates might correlate with each other. I expect those with more alcohol consumed to have higher rates of alcohol disorder realted deaths, and possibly more car accident deaths due to drunk driving. I also expect a negative correlation between cancer mortality rate and malnutrition rates, as cancer is more likely to be diagnosed in wealthier countries that struggle less with malnutrition.
+```{r}
+install.packages('fivethirtyeightdata',
+repos =
+'https://fivethirtyeightdata.github.io/drat/',
+type = 'source')
+library(fivethirtyeight)
+library(fivethirtyeightdata)
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+library(readxl)
+
+mortality <- read_excel("global_mortality.xlsx")
+drinks <-drinks
+glimpse(mortality)
+glimpse(drinks)
+```
+
+##Selecting only 2010
+Because the drinks dataset was made using data from 2010, the mortality dataset needed to be filtered to 2010 observations only to minimize bias. Therefore, all conclusions from the data throughout this project is only accurate for the year 2010.
+```{r}
+mortalitytid<-mortality%>%
+  filter(year==2010)
+```
+
+##Untidying and Tidying Drinks
+Here, the mortality dataset was pivoted longer for every variable that contained a %, which would make each numeric variable shift to a column named name and the value for that numeric variable to value. This is easily undone to retidy data by pivoting the names back to individual columns and values back to their original positions.
+```{r}
+untid<- mortalitytid%>% 
+  pivot_longer(contains("%"))
+head(untid)
+untid%>%
+  pivot_wider(names_from="name",values_from="value")%>%
+  head()
+```
+##Inner join
+I chose an inner join for the data, which will exclude any country not appearing in both datasets (inside of venn diagram). This choice was determined as countries not appearing in both would result in a lot of NA's and not allow for the analysis of mortality rates based upon drinks data. I used the tidy mortality data with only 2010 observations and the base drinks data in the join.
+```{r}
+fulldata<- mortalitytid%>% inner_join(drinks)
+head(fulldata)
+```
+
+# Summary Statistics
+Summary statistics were first calculated by averaging the results from all countries. Cardiovasular disease had the highest mortality rate by a significant margin. Also, there was large standard deviations in the average mortality rates, showing that they vary a lot between countries. The min and max statistics highlight this too, as the min and max for each variable are typically very distant from each other. Lastly, there were some countries with a minimum of 0 liters alcohol consumed, which makes sense as in some countries alcohol is illegal. The standard deviation for drinks was even larger, often as large as the actual value for the specific amount of alcohol consumed. Then, to ensure year wasn't counted as numeric, it was shifted into a character. Then, countries with alcohol disorders greater than 1% of deaths was filtered, which provided some interesting results. This showed three countries, El Salvador, Mongolia, and Guatemala, having the highest percentage of alcohol disorders, but far from the most alcohol consumed. For example Finland consumes close to five times the alcohol of El Salvador, but only 60% the alcohol disorders that El Salvador does based of percentage mortality. Next, a new categorical variable showing called nutrition was created, where high designates countries with nutritional deficiency mortality above the mean, and low designates countries with nutritional deficency mortality below the mean. A similar variable was created, except the next one was related to cardiovascular disease mortality rates. The nutritional deficiency categorical variable showed many interesting relationships, but the most significant was that those with low nutrition deficiency had a majority of deaths from cardiovasular disease or cancer, while mortality rate was much more spread out in those with high nutritional deficiency.
+```{r}
+#Summary statistics averaged across all countries
+fulldata%>% 
+  group_by(year)%>%
+  na.omit()%>%
+  summarize_if(is.numeric,list(ddmean=mean,ddsd=sd,ddvar=var,ddmin=min,ddmax=max,ddndistinct=n_distinct))%>%
+  pivot_longer(-1)%>%
+  separate(name,into=c("var","stat"),sep="dd")%>%
+  pivot_wider(names_from ="var",values_from="value")%>%
+  head()
+
+#year as a character
+fulldata<- fulldata%>%
+  mutate(year=as.character(year))
+
+
+#Filters to high alcohol disorder mortality rate
+fulldata%>%
+  filter(`Alcohol disorders (%)`>1)%>%
+  select(country,`Alcohol disorders (%)`,total_litres_of_pure_alcohol,beer_servings,wine_servings,spirit_servings)%>%
+  arrange(desc(`Alcohol disorders (%)`))%>%
+  head()
+
+#Groupby high nutritional deficieny 
+fulldatamut<-fulldata%>%
+  mutate(Nutrition=ifelse(`Nutritional deficiencies (%)`>mean(`Nutritional deficiencies (%)`),"High Nutritional Deficiency","Low Nutritional Deficiency"))
+
+#Groupby high Cardiovascular disease
+Graph3<-fulldatamut%>%
+  mutate(Cardio=ifelse(`Cardiovascular diseases (%)`>mean(`Cardiovascular diseases (%)`),"High Cardiovascular Disease","Low Cardiovascular Disease"))
+
+
+#summary stats grouped by nutritional deficiency ranking
+fulldatamut%>% 
+  select(-year)%>%
+  group_by(Nutrition)%>%
+  summarize_if(is.numeric,list(ddmean=mean,ddsd=sd,ddmin=min,ddmax=max))%>%
+  head()
+```
+
+#Correlation heatmap for all numeric variables
+Here, a correlations matrix is set up in the first part of the code. Then, the highest and lowest correlations not equalling one were arranged to quickly see which variables correlate significantly. Finally, a correlation heatmap was created, with blue being a negative correlation and red being a positive correlation, and white being no correlation. 
+When analyzing the correlations, nutritional deficiency and protein-energy malnutrition mortality rates had a correlation close to 1, which makes  logical sense. Also, cancer and parkinsons had a high correlation, which could be due to countries able to diagnose one of those diseases might also have the capability to diagnose the other. Cancer and neonatal deaths are highly negatively correlated, which could be because neonatal deaths can be prevented in advanced medicalized countries, and those countries also have citizens who live longer, resulting in them dying from cancer as opposed to another preventable disease. The graph shows the various variables' correlations. Some of these are trivial correlations, such as beer servings correlated with average alcohol intake. Others, such as dementia and maternal deaths having strong negative correlations, prove interesting subjects to consider. There are far too many correlations to comment on within the scope of this project, but the heatmap is an effective visualizaiton to ensure meaningful correlations are not completely ignored.
+
+```{r fig.height=7}
+#set up correlation
+fulldatacor<- fulldata %>% na.omit%>%
+  select_if(is.numeric)%>%
+cor()%>%
+  as.data.frame%>%
+  rownames_to_column("var1")%>%
+  pivot_longer(-1,names_to="var2",values_to="correlation")
+fulldatacor%>%head()
+#checking the highest and lowest non identical correlatinos
+fulldatacor%>%
+  filter(correlation!=1)%>%
+  arrange(desc(correlation))%>%
+  head()
+fulldatacor%>%
+  filter(correlation!=-1)%>%
+  arrange(correlation)%>%
+  head()
+
+
+fulldatacor%>%
+  ggplot(aes(var1,var2,fill=correlation))+
+  geom_tile()+
+  scale_fill_gradient2(low="blue",mid="white",high="red")+
+  theme(axis.text.x = element_text(angle = 90,hjust=1))+
+  xlab("Variable 1")+
+  ylab("Variable 2")+
+  ggtitle("Correlations Plot")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme(legend.position="right")
+
+```
+
+##Total alcohol, alcohol disorders, and road accidents
+While it might seem straightforward that alcohol consumption and alcohol disorder mortality percentages would be positively correlated, the plot shows a different picture. While there is a positive correlation, there are plenty of outliers from the line of best fit. This leads to the conclusion that while countries that consume more alcohol generally have more alcohol disorder mortality, it is certainly not a causation. Many countries have high consumption and low mortality or low consumption and high mortality from alcohol disorders. A guess as to why that could happen is that some wealthy countries might consume a lot of alcohol, but have better medical care than other countries to sustain such behavior, and countries with high alcohol disorder mortality rates might have poor healthcare systems. Also, while I expected road accidents might increase given more alcohol consumed due to drunk driving, that was not the case. In fact, it appears that the only cluster with high road accidents have low rates of alcohol consumption, however overall there is very little indication of a significant relationship between the two variables.
+```{r}
+fulldata%>%
+  ggplot(aes(x=total_litres_of_pure_alcohol,y=`Alcohol disorders (%)`,color=`Road accidents (%)`))+
+  geom_point()+
+  geom_smooth(method = "lm",color="red")+
+  xlab("Total Liters Alcohol Consumed")+
+  ylab("Mortality Rate from Alcohol Disorders (%)")+
+  labs(title = "Alcohol Consumed Correlates to Higher Alcohol Disorder Mortality Rate")+
+  scale_x_continuous(breaks=seq(0,15,2.5))+
+  geom_jitter()+
+  theme_bw()
+  
+```
+
+
+##Cardiovascular Disease, Cancer, and Malnutrition
+In this plot, the cancer mortality rate is plotted against two separate variable. One is Nutrition, which can either have higher than mean or lower than mean nutrititional defieciency mortality rate. The other variable is Cardio which can either have higher or lower than the mean cardiovascular disease mortality rate. Combined this provides the four separate cases shown in the graph. The main observation drawn from this table is that low nutritional deficiency countries have much higher average cancer mortality rates. One might hypothesize that countries with better healthcare or more wealth would have less nutritional deficiencies combined with longer life expectancy and therefore more likely to diagnose cancer. The relationship between cardiovascular disease and cancer mortality appears to be a positive correlation. This could be explained similarly to the relationship between nutritional deficiency and cancer, where countries with longer life expectancy would be expected to have both higher cancer and higher cardiovascular mortality rates.
+```{r}
+Graph3 %>%
+    ggplot(aes(x = Cardio, y =`Cancers (%)`, fill=Nutrition)) +
+    geom_bar(stat = "summary",fun=mean,position = "dodge") +
+    labs(title = "Cancer Mortality Rates for Based on Cardiovascular and Nutritional Mortality",x = "Cardiovacular Disease Mortality",y = "Cancer Mortality Rate")+
+  theme_light()+
+  scale_y_continuous(breaks=seq(0,20,4))+
+  scale_fill_brewer()
+```
+
+
+
+##kmeans/clustering
+Initially, I selected variables used thus far for the two graphs to provide an easier visual (as opposed to showing all 30+ variables). Then, the silhouette graph was used to find the number of clusters for the data, which was determined to be 3, because it was the highest point on the graph. Finally, a PAM cluster analysis was run and a visualization was formed of all the variable. The main observation drawn from this is that the red cluster does not appear to be very different from green and blue, it just lies in between them but could be split into either one. Conversely, the blue and green clusters are quite distinct. The blue cluster is low in alcohol consumption, cardiovascular and cancer mortality rates. The green has high cardiovasular disease and low nutritional deficiency. Overall, the green and blue clusters match what has been discussed throughout the project, and the red cluster are those which don't fall into either category. The green cluster characterizes countries that are hypthesized to be wealthy with high life expectancies, and the blue cluster would be hypothesized to be the countries that are poorer with low life expectancy (again this is just a hypothesis and way to describe the cluster, no data on life expectancies or economic status was analyzed). 
+```{r fig.width=15}
+#only select variables used thus far
+fulldataclust<- Graph3%>%
+  select(`Road accidents (%)`,`Cancers (%)`,total_litres_of_pure_alcohol, `Alcohol disorders (%)`,Nutrition, Cardio)
+
+library(cluster)
+gower1<- fulldataclust%>%mutate_if(is.character,as.factor)%>%
+  daisy(metric="gower")
+
+dat2<-fulldataclust%>%mutate_if(is.character,as.factor)
+
+#silhouette
+sil_width<-vector()
+for(i in 2:10){  
+  pam_fit <- pam(gower1, diss = TRUE, k = i)  
+  sil_width[i] <- pam_fit$silinfo$avg.width  
+}
+ggplot()+geom_line(aes(x=1:10,y=sil_width))+scale_x_continuous(name="k",breaks=1:10)
+
+pam1<- pam(gower1, k = 3, diss = T)
+pam1
+
+#Plotting
+library(GGally); ggpairs(dat2, columns=1:6, aes(color=as.factor(pam1$clustering)))
+```
+
+
+
+
+In conclusion, this project really opened my eyes to data analysis and its usefulness. It was really interesting to create novel graphs, correlations, and really explore data in this format with creative freedom. Looking back on this project, if there was one thing I wish I could add it would be some sort of economic ranking for each country, and maybe geographic groups based off continent. Both of these would open up the data to multitudes of new analysis possibilities, and give my hypotheses about economic causation throughout this project more merit.
+
+
+
+
+
+
+
+

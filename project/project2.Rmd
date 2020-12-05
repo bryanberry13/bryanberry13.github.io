@@ -1,0 +1,369 @@
+---
+title: "Project 2"
+author: "Bryan Berry"
+date: "11/3/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#0 Introduction
+
+My dataset comes from a tuitiontracker.org, and provides various information related to colleges, with a focus on tuition data. It has data on average pay in mid and early career for each college, as well as in and out-of-state tuitions. Also, there is a lot of identifier information for each college such as what type of education it provides and whether it is public or private. Lastly, it has a very interesting variable known as makes world better percent, which is the percentage of alumin who believe they make the world a better place. After filtering out na's and merging various data, there are 669 colleges analyzed in this project. I chose this dataset for a very personal reason. When applying to colleges, I was not aware of choosing a college to attend might affect my future pay and contentedness with a future job. I also was scared off from private schools with a hefty price tag, as I was unsure of how much that would realistically help me in life. These are situations in which analyzing data as done in this project can help provide statistics and clear-cut proof as to whether it is worth it to pay more in tuition for an education.
+
+```{r}
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+```
+
+#Set-Up
+In this chunk, the data are read in, merged,and prepared for future analysis. An inner-join was used to ensure each school has all observations.
+```{r}
+tuition_cost <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-10/tuition_cost.csv')
+
+salary_potential <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-10/salary_potential.csv')
+
+
+tut<- tuition_cost%>%
+  inner_join(salary_potential, by="name")
+tut1<-tut%>%na.omit%>%filter(type!="For Profit")
+```
+
+
+#1 Manova Test
+
+#Assumptions
+In this section, a MANOVA test will be run to see if several different variables can be used to predict whether a school is public or private. First,the assumption of multivariate normality was tested to check and see if a MANOVA is appropriate given these variables. After testing the multivariate normality, the assumption is broken as both private and public schools we reject the nullof assumption met with very low p-values. Therefore, we will proceed with this MANOVA with caution, as assumptions are not likely met.
+```{r}
+library(rstatix)
+
+group <- tut1$type 
+DVs <- tut1 %>% select(early_career_pay,mid_career_pay,make_world_better_percent,stem_percent)
+
+#Test multivariate normality for each group (null: assumption met)
+sapply(split(DVs,group), mshapiro_test)
+```
+
+
+
+#Running the MANOVA
+When running the MANOVA, a very small p-value of 1.803e-08 was given. Therefore, we can conclude there is a mean difference of at least some of the numeric variables across the type of school (public or private).
+```{r}
+man1<-manova(cbind(early_career_pay,mid_career_pay,make_world_better_percent,stem_percent)~type, data=tut1)
+summary(man1)
+
+```
+
+#Univariate Anovas and post-hoc analysis
+5 total tests were run, so the probability of error is high if no correction is made. In fact, the probability of a type 1 error if no correction is made is 22.6%. Since 5 tests were run, we must use bonferonnis correction on the normal p-value of 0.05 to test significance of the results. Since 0.05/5=0.01, this is our new alpha using bonferonnis correction. These univariate ANOVAs were run to determine which variables show mean differences across the type of school. The variables that reported significant mean-differences were early-career pay and mid-career pay. Since there are only two groups within type of school, public and private, post-hoc ttests would have no real function. Therefore, instead I checked to see whether public or private schools had the higher early and mid career pays. For both early and mid-career pay, private school alumni had the higher average pay.
+```{r}
+1-(.95^5)
+summary.aov(man1)
+tut1%>%group_by(type)%>%summarize(mean(early_career_pay))
+tut1%>%group_by(type)%>%summarize(mean(mid_career_pay))
+```
+
+
+
+#2 Randomization test
+Here, I decided to go with a randomized mean differences test to see if there was a mean difference in in-state total costs between colleges that have an early career pay above and below the mean. The null hypothesis is that there is no difference in stem percent for colleges with high and low early career pay, and the alternative is that there is a difference in stem percentages for colleges with high and low stem percentages.
+```{r}
+tut1$high_early_pay<- ifelse(tut1$early_career_pay>mean(tut1$early_career_pay),"yes","no")
+
+
+rand_dist<-vector()
+
+set.seed(12)
+for(i in 1:5000){
+new<-data.frame(stem=sample(tut1$stem_percent),high_early_pay=tut1$high_early_pay)
+rand_dist[i]<-mean(new[new$high_early_pay=="yes",]$stem)-   
+              mean(new[new$high_early_pay=="no",]$stem)
+
+}
+quantile(rand_dist,c(.025, .975))
+
+{hist(rand_dist,main="",ylab=""); abline(v = c(-2.370,2.364),col="red")}
+
+
+#actual mean difference
+mean(tut1[tut1$high_early_pay=="yes",]$stem_percent)-   
+              mean(tut1[new$high_early_pay=="no",]$stem_percent)
+```
+After looking at the results of this randomization test, we can determine that there is in fact a mean difference in the stem percentages for colleges with a high early career pay in comparison to colleges with low early career pay. It would be astronomically unlikely that the observed mean difference between these two groups would be the 14.513 if there was no true mean difference between groups, and this falls well outside the 95% confidence interval from -2.370 to 2.364 provided by the randomization test. The test statistic cutoffs are shown as red lines on the histogram.
+
+#3 Linear Regression Model
+In this part of the project, a linear regression model was run to attempt to predict the percent of alumni who believe they make the world better from the in state total cost of the college and the mid career pay of alumni from the college.
+
+#Running the model
+Here, the numeric variables were all mean-centered, and the linear model was run with interaction, and a summary was printed out.The predicted percentage of alumni who feel they make the world better when the college has an average in-state total cost and average mid-career pay is 53.07%. With an average mid-career pay, for every 1 increase in in-state total cost the makes world better percentage decreases by 0.00012. With an average in-state total cost, for every 1 increase in mid-career pay will decrease the makes world better percentage by .00013. The interaction between mid-career pay and in-state total cost and shows that the effect of mid-career pay of alumni has an effect that decreases by 1.54e-9 for each unit increase in in-state total cost.
+```{r}
+tut1$in_state_total_c <- tut1$in_state_total - mean(tut$in_state_total)
+tut1$mid_career_pay_c <- tut1$mid_career_pay - mean(tut1$mid_career_pay)
+tut1$make_world_better_percent_c <- tut1$make_world_better_percent - mean(tut1$make_world_better_percent)
+
+fit<-lm(make_world_better_percent~mid_career_pay_c*in_state_total_c,data=tut1)
+summary(fit)
+```
+
+
+#Plotting the Regression
+```{r}
+library(interactions)
+interact_plot(fit, pred = in_state_total_c, modx = mid_career_pay_c, plot.points = TRUE)
+```
+
+
+#Testing for homoskedasticity, linearitynormality
+Here, it is shown that both the linearity and normality assumptions of a linear model are in fact breached.The histogram of residuals is not normal with a skew left, the qqplot veers off the line, and the scatterplots for linearity don't have a clear linear pattern. However, the bptest of homoskedasticity shows that homoskedasticity is in fact met as the null is not rejected with a p-value of 0.2285.
+```{r}
+library(sandwich); library(lmtest) 
+#Homoskedasticity Test
+bptest(fit) 
+
+#Linearity Scatterplots
+tut1%>%ggplot(aes(in_state_total_c,make_world_better_percent))+geom_point()
+tut1%>%ggplot(aes(mid_career_pay_c,make_world_better_percent))+geom_point()
+
+#Normality plots
+resids<-fit$residuals
+fitvals<-fit$fitted.values
+data.frame(resids,fitvals)%>%ggplot(aes(fitvals,resids))+geom_point()+geom_hline(yintercept=0)
+
+par(mfrow=c(1,2)); hist(resids); qqnorm(resids); qqline(resids, col='red')
+```
+
+#Recompute with Robust Standard Errors
+The robust standard errors were used to summarize the linear model here. The robust standard errors show significant effects of mid-career pay and in-state total cost on the percentage of alumni who feel they make the world a better place. There is no significant interaction between mid-career pay and in-state total cost on the percentage of alumni who feel they make the world a better place. In terms of significance, there was no change from the test when run normally, and the coefficients were very similar too.
+```{r}
+coeftest(fit, vcov = vcovHC(fit))
+```
+#Proportion of variance explained by the model
+The regular R^2 shows that 17.48% of the variation in alumni who feel they make the world a better place is explained by the model, while the adjusted R^2 shows that only 17.11% of variation is explained by the model.
+```{r}
+summary(fit)
+```
+
+#4 Rerun with Bootstrapped Standard Errors
+The model was re-run, and then bootstrapped by randomly sampling the residuals. Then, the SE's from the original, robust SE's, and bootstrap were all compared, and shown to be very similar to each other, with the robust SE's hacing the highest coefficient. Therefore, the lowest p-values are likely to be in the original and bootstrapped models as they have lower and very similar standard errors compared to the model computed using robust SEs.
+```{R}
+  fit<-lm(make_world_better_percent~in_state_total_c*mid_career_pay_c,data=tut1) 
+  resids<-fit$residuals 
+  fitted<-fit$fitted.values 
+   
+  resid_resamp<-replicate(5000,{
+    new_resids<-sample(resids,replace=TRUE) 
+    tut1$new_y<-fitted+new_resids 
+    fit<-lm(new_y~in_state_total_c*mid_career_pay_c,data=tut1) 
+    coef(fit) 
+}) 
+##Estimated SEs from original
+coeftest(fit)[,2]%>%as.data.frame()
+##Estimated SEs from Robust Standard Errors
+coeftest(fit, vcov=vcovHC(fit))[,2]%>%as.data.frame()
+## Estimated SEs from bootstrapped residuals
+resid_resamp%>%t%>%as.data.frame%>%summarize_all(sd)
+
+```
+
+#5 Logistic Regression
+First, a variable named binmidcareer was formed to form a binary variable in which 1 correlates to higher than the mean mid-career pay, and 0 correlates to lower than the mean mid-career pay. Then, a logistic regression was run to see if in-state total costs and the percentage of alumni who feel they make the world a better place could predict this new variable binmidcareer. Controlling for the make world better percent, for every one increase in in-state total cost the odds of being in the higher mid-career pay group increase by a factor of 1.0000498. Controlling for the in-state total cost variable, for every one increase in makes world better percent will decrease the odds of being in the higher binmidcareer group by a factor of 0.9332300. The odds of being in the higher mid-career pay group at the average in-state total cost and makes world better percent are 0.6040845.
+```{r}
+logit<-function(p)log(odds(p))
+tut1$binmidcareer <- ifelse(tut1$mid_career_pay>mean(tut1$mid_career_pay),1,0)
+tut1<-tut1%>%select(-name,-state,-state_code,-state_name)
+tut1
+fit3<- glm(binmidcareer~in_state_total_c+make_world_better_percent_c,data=tut1, family=binomial(link="logit"))
+summary(fit3)
+exp(coef(fit3))
+```
+#Class_diag function
+```{r}
+class_diag<-function(probs,truth){
+  tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
+  acc=sum(diag(tab))/sum(tab)
+  sens=tab[2,2]/colSums(tab)[2]
+  spec=tab[1,1]/colSums(tab)[1]
+  ppv=tab[2,2]/rowSums(tab)[2]
+  f1=2*(sens*ppv)/(sens+ppv)
+
+  if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE){
+    truth<-as.numeric(truth)-1}
+  
+  ord<-order(probs, decreasing=TRUE)
+  probs <- probs[ord]; truth <- truth[ord]
+  
+  TPR=cumsum(truth)/max(1,sum(truth)) 
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  
+  dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
+  TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+  
+  n <- length(TPR)
+  auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+
+  data.frame(acc,sens,spec,ppv,f1,auc)
+}
+```
+
+#Confusion Matrix
+The accuracy of the model is 0.7488789, the sensitivity(or true positive rate) is 0.6245487, the specificity(or true negative rate) is 0.8367347, the precision(or percent of positives correctly predicted) is 0.7200578. The AUC of 0.7807228 shows the model is fair at predicting the binmidcareer variable.
+```{r}
+prob <- predict(fit3, type = "response")
+table(predict = as.numeric(prob > 0.5), truth = tut1$binmidcareer) %>% 
+    addmargins
+class_diag(prob, tut1$binmidcareer)
+```
+
+#Density Plot
+A density plot of the log-odds was then made to highlight the accuracy (and inaccuracy of the plot). Shown here, the model is fairly accurate, but is far from perfect.
+```{r}
+tut1$logit<-predict(fit3) 
+tut1$binmidcareer<-ifelse(tut1$mid_career_pay>mean(tut1$mid_career_pay),"high","low")
+
+tut1 %>% mutate(binmidcareer=factor(binmidcareer,levels=c("high","low"))) %>% 
+ggplot(aes(logit, fill=binmidcareer))+geom_density(alpha=.3)+
+  geom_vline(xintercept=0,lty=2)
+```
+#ROC Plot
+Here, the AUC of the ROCplot is 0.781, which is a fairly good AUC. It is a decent model as it does not fall in the 0.5-0.7 range.The accuracy of the model is 0.7488789, the sensitivity(or true positive rate) is 0.6245487, the specificity(or true negative rate) is 0.8367347, the precision(or percent of positives correctly predicted) is 0.7200578. The AUC of 0.7807228 shows the model is fair at predicting the binmidcareer variable.
+```{r}
+library(plotROC)
+tut1$binmidcareer<-ifelse(tut1$mid_career_pay>mean(tut1$mid_career_pay),1,0)
+tut1$prob <- predict(fit3, type = "response")
+tut1$predicted <- ifelse(tut1$binmidcareer > 0.5, "High", 
+    "Low")
+ROCplot <- ggplot(tut1) + geom_roc(aes(d = binmidcareer, 
+    m = prob), n.cuts = 0)
+ROCplot
+calc_auc(ROCplot)
+```
+
+
+#6Full Logistic Regression
+Here, all variables that could possibly be used to predict the variable binmidcareer, which either shows colleges in the top or bottom half of mid-career pay. The fitted model showed an accuracy of 0.9730942, the sensitivity (or true positive rate) is 0.9602888, the specificity (or true negative rate) is 0.9821429, the precision (or percent of positives correctly predicted) is 0.974359, and the AUC is 0.996307. All these measures seem to show that the model is a very accurate predictor of binmidcareer.
+```{r}
+tut1
+tut2<-tut1%>%select(-mid_career_pay,-mid_career_pay_c,-high_early_pay,-in_state_total_c,-make_world_better_percent_c,-prob,-predicted,-degree_length,-in_state_total,-out_of_state_total)
+tut2
+fit4<- glm(binmidcareer~.,data=tut2,family="binomial")
+summary(fit4)
+
+
+prob <- predict(fit4, type = "response")
+class_diag(prob, tut2$binmidcareer)
+```
+#10-fold CV
+When performing a 10-fold CV on all relevant variables, we can see that the model stands quite well in cross validation. The accuracy is 0.9731117, the sensitivity (or true positive rate) was 0.9596127, the specificity (or true negative rate) is 0.9819315, the precision (or percent of positives correctly predicted) is 0.9748988, and the AUC is 0.9959613. Since all these numbers are very close to 1, we can tell the model is extremely accurate in predicting whether or not a college is in the upper or lower half of mid-career pay.
+```{r}
+
+set.seed(1234)
+k=10 
+
+data<-tut2[sample(nrow(tut2)),] 
+folds<-cut(seq(1:nrow(tut2)),breaks=k,labels=F) 
+
+diags<-NULL
+for(i in 1:k){
+ 
+  train<-data[folds!=i,] 
+  test<-data[folds==i,]
+  
+  truth<-test$binmidcareer 
+
+  fit<-glm(binmidcareer~.,data=tut2,family="binomial")
+  
+
+  probs<-predict(fit,newdata = test,type="response")
+  
+
+  diags<-rbind(diags,class_diag(probs,truth))
+}
+
+
+summarize_all(diags,mean) 
+```
+#LASSO
+When running the LASSO to see whether variables should be dropped, the type of university, the cost of room and board, stem percent, and in state tuition are all able to be dropped. On the other hand, out of state tuition, rank, early career pay, and make world better percent are all significant predictors in this model. However, of these retained, it appears the main effect is coming from early career pay, which makes sense, as those who make a lot of money early in their career will likely make more later in their career too. Also, although it is a small effect, it is interesting how higher percentage of alumni who feel they make the world a better place results in a lower predicted mid-career pay. 
+```{r}
+library(glmnet)
+set.seed(1234)
+#code categorical predictors as 0/1
+x<-model.matrix(binmidcareer ~ -1+., data=tut2) #the -1 drops the intercept
+x<-scale(x)
+y<-as.matrix(tut2$binmidcareer)
+
+cv2<-cv.glmnet(x,y, family="binomial")
+lasso2<-glmnet(x,y,family="binomial",lambda=cv2$lambda.1se)
+coef(lasso2)
+```
+#10-fold CV on LASSO Variables
+When running the LASSO variables under a CV, the AUC is slightly higher than the 10-fold CV for all variables. The AUC for this LASSO CV is 0.996052, showing this model does an excellent job of predicting whether a college is in the upper or lower half of mid-career pay for alumni. However, this model remains limited, as it relies so heavily on the early-career pay averages of a college, but it is still interesting how it does such a great job of this prediction.
+```{r}
+set.seed(1234)
+k=10 
+
+data<-tut2[sample(nrow(tut2)),] 
+folds<-cut(seq(1:nrow(tut2)),breaks=k,labels=F) 
+
+diags<-NULL
+for(i in 1:k){
+ 
+  train<-data[folds!=i,] 
+  test<-data[folds==i,]
+  
+  truth<-test$binmidcareer 
+
+  fit<-glm(binmidcareer~out_of_state_tuition+rank+early_career_pay+make_world_better_percent,data=tut2,family="binomial")
+  
+
+  probs<-predict(fit,newdata = test,type="response")
+  
+
+  diags<-rbind(diags,class_diag(probs,truth))
+}
+
+
+summarize_all(diags,mean) 
+
+```
+
+
+#Conclusion
+Overall, this project proved to be a lot of work, but the work was well worth it. From building linear and logisitic models, to learning some of the intricacies of ggplot, I learned a lot of useful tricks for future coding. In retrospect, I wish I had made a different logistic model, predicting something other than mid-career pay, as it ended up relying almost solely on early-career pay as a predictive variable. In spite of this, it was still interesting to analyze the various correlations within college statistics. While I learned a lot analyzing this data, it has also proven to provoke many more questions for future research, and I would love to work with this or another similar dataset in the future.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

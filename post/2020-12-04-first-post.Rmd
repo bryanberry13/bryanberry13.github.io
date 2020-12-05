@@ -1,0 +1,22 @@
+---
+title: First Post
+author: Bryan Berry
+date: '2020-12-04'
+slug: first-post
+categories: []
+tags: []
+description: ''
+---
+wefjkln;ewif
+```{r}
+print("hello world")
+```
+
+
+```{py}
+print("hello world")
+```
+
+[Link to project 1](/project/project1/)
+
+[Link to google](https://www.google.com)
