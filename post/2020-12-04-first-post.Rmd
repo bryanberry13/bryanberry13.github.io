@@ -20,3 +20,5 @@ print("hello world")
 [Link to project 1](/project/project1/)
 
 [Link to google](https://www.google.com)
+
+[Link to resume](/project/Resume.pdf)

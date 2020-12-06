@@ -6,7 +6,16 @@
     <description>Recent content in Posts on Bryan Berry</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
-    <lastBuildDate>Fri, 04 Dec 2020 00:00:00 +0000</lastBuildDate><atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 05 Dec 2020 00:00:00 +0000</lastBuildDate><atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>My Python Post</title>
+      <link>/post/2020/12/05/my-python-post/</link>
+      <pubDate>Sat, 05 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2020/12/05/my-python-post/</guid>
+      <description>Recently in class for SDS 348, we have been learning about how to use python, particularly for data science. It has been very interesting, especially considering we learned most of the same ideas and functions, but in a different syntax using R. Typically, we have been using Jupyter notebook to write code in python, but right now, this post will use Rstudio and interacting python and r chunks. To make a chunk work in python, we use {python}, insteasd of {r} at the start of a chunk.</description>
+    </item>
+    
     <item>
       <title>First Post</title>
       <link>/post/2020/12/04/first-post/</link>
@@ -15,7 +24,8 @@
       <guid>/post/2020/12/04/first-post/</guid>
       <description>wefjkln;ewif
 print(&amp;quot;hello world&amp;quot;) ## [1] &amp;quot;hello world&amp;quot; print(&amp;quot;hello world&amp;quot;) Link to project 1
-Link to google</description>
+Link to google
+Link to resume</description>
     </item>
     
   </channel>
