@@ -48,7 +48,7 @@ y="hello yourself"
 print(r.y)
 ```
 Here is a fun picture of Vancouver.
-![](/post/2020-12-05-my-python-post_files/chloe-evans-k8WrrgXeWzA-unsplash.jpg)
+
 
 
 
